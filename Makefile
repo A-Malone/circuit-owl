@@ -38,14 +38,14 @@ endif
 LIBRARY_LINK_FLAGS += \
 	$(shell pkg-config --libs --static opencv) \
 	$(shell pkg-config --libs --static tesseract) \
-	$(shell pkg-config --libs --static python) \
-	-lboost_python \
+	$(shell pkg-config --libs --static python3) \
+	-lboost_python-py34 \
 	-lboost_system \
 	-lpthread \
 
 # GRAPHICS_INCL_FLAGS += $(shell pkg-config --cflags gtkmm-3.0)
 OPENCV_INCL_FLAGS += $(shell pkg-config --cflags opencv)
-PYTHON_INCL_FLAGS += $(shell pkg-config --cflags python)
+PYTHON_INCL_FLAGS += $(shell pkg-config --cflags python3)
 
 INCLUDE_FLAGS += \
 	-I .
