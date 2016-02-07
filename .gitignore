@@ -2,7 +2,7 @@
 *.slo
 *.lo
 *.o
-**/OBJ/**/*.o
+OBJ/
 
 # Compiled Dynamic libraries
 *.so
@@ -17,8 +17,8 @@
 **/DEPS/**/*.d
 
 # Executables
-EXE/**
-LIB/**
+EXE/
+LIB/
 
 # YCM compiled config
 .ycm_extra_conf.pyc
