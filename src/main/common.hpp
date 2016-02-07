@@ -14,40 +14,43 @@ class CircuitElement
 
     public:
         CircuitElement()
-            : id(0), NE(), SW(), val(0), type(0) {};
+            : id(0), NE(), SW(), val(0), type(0), node_id(2) {};
 
         CircuitElement(int _id, cv::Point _NE, cv::Point _SW, int _v, int _t)
-            : id(_id), NE(_NE), SW(_SW), val(_v), type(_t) {};
-         
+            : id(_id), NE(_NE), SW(_SW), val(_v), type(_t), node_id(2) {};
+
         int id;
         cv::Point NE;
         cv::Point SW;
         int val;
         int type; // 0 is resistor
-        int node_id[2];
+        std::vector<int> node_id;
+
+        std::vector<int>::iterator node_id_begin() {return node_id.begin();}
+        std::vector<int>::iterator node_id_end() {return node_id.end();}
 };
 
 class CircuitNode
 {
     public:
         CircuitNode()
-            : id(0), voltage(0), element_ids(), changeable(true), centroid() {};
+            : id(0), voltage(0), changeable(true), element_ids(), centroid() {};
 
         CircuitNode(int _id, double _v, std::vector<int> _elem, bool _c)
-            : id(_id), voltage(_v), element_ids(_elem), changeable(_c), centroid() {};
+            : id(_id), voltage(_v), changeable(_c), element_ids(_elem), centroid() {};
 
         CircuitNode(int _id, std::vector<int> _elem, cv::Point _centroid)
-            : id(_id), voltage(0), element_ids(_elem), changeable(true), centroid(_centroid) {};
+            : id(_id), voltage(0), changeable(true), element_ids(_elem), centroid(_centroid) {};
 
         int id;
         double voltage;
-        std::vector<int> element_ids;
         bool changeable;
 
+        std::vector<int> element_ids;
         cv::Point centroid;
 
-        // Some assembly required        
-        std::vector<int>::iterator elem_id_begin() {return element_ids.begin();}        
+        // Some assembly required
+        std::vector<int>::iterator elem_id_begin() {return element_ids.begin();}
         std::vector<int>::iterator elem_id_end() {return element_ids.end();}
 };
 
@@ -57,24 +60,5 @@ inline std::ostream& operator<<(std::ostream& os, const CircuitNode& node) {
     os << ", V=" << node.voltage << ", changeable=" << node.changeable << ", centroid=" << node.centroid;
     return os;
 }
-
-/*
-BOOST_PYTHON_MODULE(circuit_common)
-{
-    using namespace boost::python;
-
-    class_<CircuitElement>("CircuitElement")
-        .def_readwrite("id", &CircuitElement::id)
-        .def_readwrite("val", &CircuitElement::val)
-        .def_readwrite("is_resistor", &CircuitElement::type)
-        .def_readwrite("node_id", &CircuitElement::node_id);
-
-    class_<CircuitNode>("CircuitNode")
-        .def_readwrite("id", &CircuitNode::id)
-        .def_readwrite("voltage", &CircuitNode::voltage)
-        .def_readwrite("changeable", &CircuitNode::changeable)
-        .def_readwrite("element_ids", range(&CircuitNode::elem_id_begin, &CircuitNode::elem_id_end));
-}
-*/
 
 #endif  /* MAIN_COMMON_CPP */

@@ -16,21 +16,19 @@ OBJ_DIR=$(BUILD_ROOT)OBJ/
 DEPS_DIR=$(BUILD_ROOT)DEPS/
 LIB_DIR=$(BUILD_ROOT)LIB/
 
-# define source directories
+# Define subsystems
+SUBSYSTEMS = circuit_graph/ elements/ main/ text/ utils/ analysis/
+
+# Define source directories
 SOURCE_ROOT = src/
 SOURCE_DIRS = \
 	$(SOURCE_ROOT) \
-	$(SOURCE_ROOT)circuit_graph/ \
-	$(SOURCE_ROOT)display/ \
-	$(SOURCE_ROOT)elements/ \
-	$(SOURCE_ROOT)main/ \
-	$(SOURCE_ROOT)text/ \
-	$(SOURCE_ROOT)utils/ \
-	$(SOURCE_ROOT)analysis/ \
+	$(addprefix $(SOURCE_ROOT),$(SUBSYSTEMS))
+
 
 # compute all directories that might need creation
-DIRS=$(BUILD_ROOT) $(EXE_DIR) $(OBJ_DIR) $(DEPS_DIR) $(LIB_DIR) \
-	$(addprefix $(OBJ_DIR),$(SOURCE_DIRS)) \
+DIRS=$(BUILD_ROOT) $(EXE_DIR) $(OBJ_DIR) $(DEPS_DIR) $(DEPS_DIR)$(SOURCE_ROOT) $(LIB_DIR) \
+	$(addprefix $(OBJ_DIR),$(SUBSYSTEMS)) \
 	$(addprefix $(DEPS_DIR),$(SOURCE_DIRS))
 
 # CXX = clang++ -stdlib=libstdc++
@@ -66,7 +64,7 @@ OPENCV_INCL_FLAGS += $(shell pkg-config --cflags opencv)
 PYTHON_INCL_FLAGS += $(shell pkg-config --cflags python3)
 
 INCLUDE_FLAGS += \
-	-I .
+	-I $(SOURCE_ROOT)
 
 CXXFLAGS += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(INCLUDE_FLAGS) -fPIC
 LDFLAGS  += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(LIBRARY_LINK_FLAGS)
@@ -76,16 +74,16 @@ LDFLAGS  += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(LIBRARY_LINK_FLAGS)
 
 # define executables
 EXES= \
-$(EXE_DIR)elements \
-$(EXE_DIR)circuit_graph_test \
-$(EXE_DIR)text_test \
-$(EXE_DIR)display_test \
-$(EXE_DIR)analysis_test \
-$(EXE_DIR)main
+	$(EXE_DIR)elements \
+	$(EXE_DIR)circuit_graph_test \
+	$(EXE_DIR)text_test \
+	$(EXE_DIR)analysis_test \
+	$(EXE_DIR)main
 
 # define libs to build
 LIBS= \
-$(LIB_DIR)circuit_analyzer.so
+	$(LIB_DIR)circuit_analyzer.so \
+	$(LIB_DIR)common.so
 
 all: $(EXES) $(LIBS) | build_info
 
@@ -111,10 +109,6 @@ $(EXE_DIR)text_test: \
 	$(OBJ_DIR)text/text_finder.o \
 	$(OBJ_DIR)text/text_test_main.o
 
-$(EXE_DIR)display_test: \
-	$(OBJ_DIR)display/display.o \
-	$(OBJ_DIR)display/display_test_main.o
-
 $(EXE_DIR)analysis_test: \
 	$(OBJ_DIR)analysis/analysis.o \
     $(OBJ_DIR)analysis/analysis_test_main.o
@@ -122,7 +116,6 @@ $(EXE_DIR)analysis_test: \
 $(EXE_DIR)main: \
 	$(OBJ_DIR)main/main.o \
 	$(OBJ_DIR)analysis/analysis.o \
-	$(OBJ_DIR)display/display.o \
 	$(OBJ_DIR)elements/elements.o \
 	$(OBJ_DIR)text/text_finder.o \
 	$(OBJ_DIR)circuit_graph/circuit_graph.o \
@@ -143,7 +136,6 @@ $(OBJ_DIR)main/%.o: INCLUDE_FLAGS+=$(PYTHON_INCL_FLAGS)
 $(LIB_DIR)circuit_analyzer.so: \
 	$(OBJ_DIR)main/main.o \
 	$(OBJ_DIR)analysis/analysis.o \
-	$(OBJ_DIR)display/display.o \
 	$(OBJ_DIR)elements/elements.o \
 	$(OBJ_DIR)text/text_finder.o \
 	$(OBJ_DIR)circuit_graph/circuit_graph.o \
@@ -151,6 +143,9 @@ $(LIB_DIR)circuit_analyzer.so: \
 	$(OBJ_DIR)circuit_graph/line_clustering.o \
 	$(OBJ_DIR)circuit_graph/line_finding.o \
 	$(OBJ_DIR)utils/geometry_utils.o
+
+$(LIB_DIR)common.so: \
+	$(OBJ_DIR)main/common.o
 
 # include all the dependency files, if any exist
 EXISTING_DEP_FILES = \
@@ -167,7 +162,7 @@ endif
 # second one adds stub rules for each depended on file (make might
 # complain with generated files
 .SECONDEXPANSION:
-$(OBJ_DIR)%.o: %.cpp | build_info $(OBJ_DIR)$$(dir %) $(DEPS_DIR)$$(dir %)
+$(OBJ_DIR)%.o: $(SOURCE_ROOT)%.cpp | build_info $(OBJ_DIR)$$(dir %) $(DEPS_DIR)$(SOURCE_ROOT)$$(dir %)
 	$(CXX) -c  $(shell readlink --canonicalize $<) -o  $@ $(CXXFLAGS)
 	@$(CXX) -MM $< -MF $(DEPS_DIR)$<.d.tmp $(CXXFLAGS)
 	@sed -e 's|.*:|$@:|' < $(DEPS_DIR)$<.d.tmp > $(DEPS_DIR)$<.d
@@ -199,6 +194,8 @@ clean:
 			rm -f $${deps_subdir}*.d; \
 			rmdir --ignore-fail-on-non-empty $${deps_subdir}; \
 		fi; \
+	done
+	for subdir in $(SUBSYSTEMS); do \
 		if [ -e $(OBJ_DIR)$${subdir} ]; then \
 			objs_subdir=$$(readlink --canonicalize $(OBJ_DIR)$${subdir})/; \
 			echo $${objs_subdir}; \
