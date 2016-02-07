@@ -18,7 +18,7 @@
 
 # Executables
 EXE/**
-LIB/*.so
+LIB/**
 
 # YCM compiled config
 .ycm_extra_conf.pyc
@@ -26,6 +26,7 @@ LIB/*.so
 # misc
 train-sch.sublime-workspace
 *~
+.venv
 
 # Django stuff
 *.sqlite3

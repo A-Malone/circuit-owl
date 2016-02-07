@@ -10,10 +10,28 @@ MAKEFLAGS+=" -j$(grep -c "vendor_id" /proc/cpuinfo) "
 
 BUILD_MODE ?= debug
 
-EXE_DIR=EXE/
-OBJ_DIR=OBJ/
-DEPS_DIR=DEPS/
-LIB_DIR=LIB/
+BUILD_ROOT=build/
+EXE_DIR=$(BUILD_ROOT)EXE/
+OBJ_DIR=$(BUILD_ROOT)OBJ/
+DEPS_DIR=$(BUILD_ROOT)DEPS/
+LIB_DIR=$(BUILD_ROOT)LIB/
+
+# define source directories
+SOURCE_ROOT = src/
+SOURCE_DIRS = \
+	$(SOURCE_ROOT) \
+	$(SOURCE_ROOT)circuit_graph/ \
+	$(SOURCE_ROOT)display/ \
+	$(SOURCE_ROOT)elements/ \
+	$(SOURCE_ROOT)main/ \
+	$(SOURCE_ROOT)text/ \
+	$(SOURCE_ROOT)utils/ \
+	$(SOURCE_ROOT)analysis/ \
+
+# compute all directories that might need creation
+DIRS=$(BUILD_ROOT) $(EXE_DIR) $(OBJ_DIR) $(DEPS_DIR) $(LIB_DIR) \
+	$(addprefix $(OBJ_DIR),$(SOURCE_DIRS)) \
+	$(addprefix $(DEPS_DIR),$(SOURCE_DIRS))
 
 # CXX = clang++ -stdlib=libstdc++
 # CXX = g++
@@ -39,7 +57,7 @@ LIBRARY_LINK_FLAGS += \
 	$(shell pkg-config --libs --static opencv) \
 	$(shell pkg-config --libs --static tesseract) \
 	$(shell pkg-config --libs --static python3) \
-	-lboost_python-py34 \
+	-lboost_python3 \
 	-lboost_system \
 	-lpthread \
 
@@ -55,14 +73,6 @@ LDFLAGS  += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(LIBRARY_LINK_FLAGS)
 
 # keep .o files
 .PRECIOUS: $(OBJ_DIR)%.o
-
-# define source directories
-SOURCE_DIRS = circuit_graph/ display/ elements/ main/ text/ utils/ analysis/ ./
-
-# compute all directories that might need creation
-DIRS=$(EXE_DIR) $(OBJ_DIR) $(DEPS_DIR) $(LIB_DIR) \
-	$(addprefix $(OBJ_DIR),$(SOURCE_DIRS)) \
-	$(addprefix $(DEPS_DIR),$(SOURCE_DIRS))
 
 # define executables
 EXES= \
@@ -140,7 +150,7 @@ $(LIB_DIR)circuit_analyzer.so: \
 	$(OBJ_DIR)circuit_graph/connection_finding.o \
 	$(OBJ_DIR)circuit_graph/line_clustering.o \
 	$(OBJ_DIR)circuit_graph/line_finding.o \
-	$(OBJ_DIR)utils/geometry_utils.o	
+	$(OBJ_DIR)utils/geometry_utils.o
 
 # include all the dependency files, if any exist
 EXISTING_DEP_FILES = \
@@ -180,6 +190,7 @@ clean:
 	-rm -f $(EXES);
 	-rm -f $(LIBS);
 	-if [ -e $(EXE_DIR)  ]; then rmdir --ignore-fail-on-non-empty $(EXE_DIR);  fi;
+	-if [ -e $(LIB_DIR)  ]; then rmdir --ignore-fail-on-non-empty $(LIB_DIR);  fi;
 
 	for subdir in $(SOURCE_DIRS); do \
 		if [ -e $(DEPS_DIR)$${subdir} ]; then \
