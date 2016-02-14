@@ -40,3 +40,4 @@ mysite/node_modules/
 **/elements/models/**/*.png
 **/elements/models/**/*.jpg
 **/elements/models/**/*.dat
+**/elements/models/**/*.xml

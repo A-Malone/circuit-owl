@@ -74,7 +74,7 @@ LDFLAGS  += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(LIBRARY_LINK_FLAGS)
 
 # define executables
 EXES= \
-	$(EXE_DIR)elements \
+	$(EXE_DIR)elements \	
 	$(EXE_DIR)circuit_graph_test \
 	$(EXE_DIR)text_test \
 	$(EXE_DIR)analysis_test \

@@ -8,52 +8,41 @@ import subprocess
 #---------------------PARSE ARGUMENTS------------------------
 #------------------------------------------------------------
 
-parser = argparse.ArgumentParser(description='Create samples or subsystems')
+parser = argparse.ArgumentParser(description='Train models')
 parser.add_argument('subsystem', help='The subsystem you want to generate ')
-parser.add_argument('--num', dest='num', type=int, default=1000)
 
 args = parser.parse_args()
 
 subsystem_path = os.path.join(os.getcwd(), args.subsystem)
-
-pos_index = os.path.join(subsystem_path, "pos", "index.dat")
 neg_index = os.path.join(subsystem_path, "neg", "index.dat")
 
-pos_images =[]
-neg_images = [] 
-
-with open(pos_index, 'r') as f:
-    pos_images = f.readlines()
-
-num_created = 0
-samples_per = int(args.num / len(pos_images))
-
-#------------------------------------------------------------
-#-------------------CREATE OUTPUT DIR------------------------
-#------------------------------------------------------------
 samples_dir = os.path.join(subsystem_path, "samples")
 
-if (os.path.exists(samples_dir)):
-    shutil.rmtree(samples_dir)
+#if(not os.path.exists(samples_dir)):
+#    raise AssertionError("No samples dir found")
 
-os.makedirs(samples_dir)
-
-output_info_file = os.path.join(samples_dir, "info.dat")
+vec_file = os.path.join(samples_dir, "info.vec")
 
 #------------------------------------------------------------
-#--------------------CREATE SAMPLES--------------------------
+#-------------------LOCATE OUTPUT DIR------------------------
 #------------------------------------------------------------
+model_dir = os.path.join(subsystem_path, "model")
 
-cmd_template = "opencv_createsamples -img {} -bg {} -info {} -num {} -pngout -w 20 -h 20 -bgcolor 255"
+if (os.path.exists(model_dir)):
+    shutil.rmtree(model_dir)
 
-for img_line in pos_images:
-    
-    pos_img = img_line.split(" ")[0]
-    img_path = os.path.join(subsystem_path, "pos", pos_img)
-    
-    num_samples = min(args.num - num_created, samples_per)
-    num_created += num_samples
+os.makedirs(model_dir)
 
-    cmd_str = cmd_template.format(img_path, neg_index, output_info_file, num_samples)
-    
-    subprocess.call(shlex.split(cmd_str))
+#------------------------------------------------------------
+#------------------------TRAIN MODEL-------------------------
+#------------------------------------------------------------
+numPos = 50
+numNeg = 100
+
+cmd_template = "opencv_traincascade -data {} -vec {} -bg {} -numPos {} -numNeg {} -numStages 20 -nsplits 2 -w 20 -h 20"
+cmd_str = cmd_template.format(model_dir, vec_file, neg_index, numPos, numNeg)
+print(cmd_str)
+
+subprocess.call(shlex.split(cmd_str))
+
+print("finished")

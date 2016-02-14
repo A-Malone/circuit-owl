@@ -38,7 +38,10 @@ if (os.path.exists(samples_dir)):
 
 os.makedirs(samples_dir)
 
+tmp_info_file = os.path.join(samples_dir, "info_tmp.dat")
 output_info_file = os.path.join(samples_dir, "info.dat")
+
+output_vec_file = os.path.join(samples_dir, "info.vec")
 
 #------------------------------------------------------------
 #--------------------CREATE SAMPLES--------------------------
@@ -54,6 +57,15 @@ for img_line in pos_images:
     num_samples = min(args.num - num_created, samples_per)
     num_created += num_samples
 
-    cmd_str = cmd_template.format(img_path, neg_index, output_info_file, num_samples)
-    
+    cmd_str = cmd_template.format(img_path, neg_index, tmp_info_file, num_samples)   
+
     subprocess.call(shlex.split(cmd_str))
+
+    with open(tmp_info_file, 'r') as f:
+        data = f.read()
+
+    with open(output_info_file, 'a') as f:
+        f.write(data)
+
+vec_cmd_str = "opencv_createsamples -info {} -vec {} -num {} -pngout -w 20 -h 20 -bgcolor 255".format(output_info_file, output_vec_file, num_created)
+subprocess.call(shlex.split(vec_cmd_str))
