@@ -10,13 +10,13 @@ import io
 #------------------------------------------------------------
 
 # Query
-query = "american resistor symbol"
+query = "finite state machine"
 start_index = 1
 num_results = 100
 
 # Output files
-start_number = 1
-out_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pos', 'img')
+start_number = 101
+out_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resistor', 'neg', 'img')
 out_format = "png"
 #------------------------------------------------------------
 

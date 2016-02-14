@@ -38,4 +38,5 @@ mysite/node_modules/
 
 # Model training
 **/elements/models/**/*.png
+**/elements/models/**/*.jpg
 **/elements/models/**/*.dat
