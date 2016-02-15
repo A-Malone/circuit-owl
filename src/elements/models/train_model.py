@@ -36,8 +36,8 @@ os.makedirs(model_dir)
 #------------------------------------------------------------
 #------------------------TRAIN MODEL-------------------------
 #------------------------------------------------------------
-numPos = 50
-numNeg = 100
+numPos = 200
+numNeg = 200
 
 cmd_template = "opencv_traincascade -data {} -vec {} -bg {} -numPos {} -numNeg {} -numStages 20 -nsplits 2 -w 20 -h 20"
 cmd_str = cmd_template.format(model_dir, vec_file, neg_index, numPos, numNeg)
